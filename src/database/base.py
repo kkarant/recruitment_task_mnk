@@ -8,7 +8,7 @@ class BaseDatabase:
         self.config = db_config
 
     @contextmanager
-    def _transaction(self):
+    def transaction(self):
         conn = psycopg2.connect(
             database=self.config.database,
             user=self.config.user,
@@ -69,11 +69,14 @@ class BaseDatabase:
         conn.commit()
 
     def createTables(self):
-        with self._transaction() as database:
+        with self.transaction() as database:
             cur, conn = database
             self.createTableData(cur, conn)
             self.createTableDeposit(cur, conn)
             self.createTablePrice(cur, conn)
             self.createTableQuantity(cur, conn)
             self.createTableWeight(cur, conn)
+
+    def insert(self, data, cur, conn):
+        raise NotImplementedError
 
