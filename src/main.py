@@ -7,7 +7,7 @@ from config import DatabaseSettings, FTPSettings
 from service import insert_csv_data_to_db
 from database.base import BaseDatabase
 from database.crud import \
-    DataManager, PriceManager, DepositManager, QualityManager, WeightManager
+    DataManager, PriceManager, DepositManager, QualityManager, WeightManager, ReportManager
 
 
 def list_files(ftp):
@@ -58,7 +58,13 @@ def main():
     }
 
     for manager, file_data in files.items():
-        insert_csv_data_to_db(file_data, manager)
+        ...
+        #insert_csv_data_to_db(file_data, manager)
+
+    rManager = ReportManager(db_config)
+    with rManager.transaction() as session:
+        cur, conn = session
+        rManager.reportGenerator(cur, conn)
 
     # with FTP(os.environ['IP']) as ftp:
     #     ftp.login(user=os.environ['LOGIN'], passwd=os.environ['PASSWORD'])

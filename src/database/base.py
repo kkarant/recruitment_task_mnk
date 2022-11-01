@@ -38,7 +38,7 @@ class BaseDatabase:
     def createTableDeposit(cur, conn):
         cur.execute(f'''create table if not exists DEPOSIT_(
                              part_number varchar(10) not null,
-                             deposit varchar(10) not null
+                             deposit integer not null
                             )''')
         conn.commit()
 
@@ -68,6 +68,21 @@ class BaseDatabase:
                             )''')
         conn.commit()
 
+    @staticmethod
+    def createTableReport(cur, conn):
+        cur.execute(f'''create table if not exists REPORT_(
+                                     part_number  varchar(20) not null,
+                                     main_part_number  varchar(20) not null,
+                                     manufacturer varchar(45) not null,
+                                     category_ varchar(255) not null,
+                                     origin varchar(10) not null,
+                                     price decimal(10, 5) not null,
+                                     deposit decimal(10, 5) not null,
+                                     overall_price decimal(10, 5) not null,
+                                     quantity integer not null
+                                    )''')
+        conn.commit()
+
     def createTables(self):
         with self.transaction() as database:
             cur, conn = database
@@ -76,6 +91,7 @@ class BaseDatabase:
             self.createTablePrice(cur, conn)
             self.createTableQuantity(cur, conn)
             self.createTableWeight(cur, conn)
+            self.createTableReport(cur, conn)
 
     def insert(self, data, cur, conn):
         raise NotImplementedError
