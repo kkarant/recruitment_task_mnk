@@ -38,7 +38,7 @@ class BaseDatabase:
     def createTableDeposit(cur, conn):
         cur.execute(f'''create table if not exists DEPOSIT_(
                              part_number varchar(10) not null,
-                             deposit integer not null
+                             deposit varchar(10) not null
                             )''')
         conn.commit()
 
@@ -96,3 +96,11 @@ class BaseDatabase:
     def insert(self, data, cur, conn):
         raise NotImplementedError
 
+    def alterTable(self, cur, conn):
+        cur.execute(f'''UPDATE price_ SET price = REPLACE(price,',','.');
+        ALTER TABLE price_ ALTER COLUMN price TYPE DECIMAL using price::numeric;
+        UPDATE quantity_ SET quantity = REPLACE(quantity, '>', ' ' );
+        ALTER TABLE quantity_ ALTER COLUMN quantity TYPE integer USING quantity::integer;
+        UPDATE deposit_ SET deposit = REPLACE(deposit, ',', '.' ) where deposit like '%,%';
+        ALTER TABLE deposit_ ALTER COLUMN deposit TYPE decimal USING deposit::decimal;''')
+        conn.commit()

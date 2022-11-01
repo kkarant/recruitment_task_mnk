@@ -49,6 +49,14 @@ class ReportManager(BaseDatabase):
         cur.execute(insertStr, data)
         conn.commit()
 
+    def select(self, cur, conn):  # DISTINCT
+        insertStr = f'''SELECT 
+        main_part_number, manufacturer, category_, origin, price, deposit, overall_price, quantity
+        FROM report_;'''
+        cur.execute(insertStr)
+        result = cur.fetchall()
+        return result
+
     def reportGenerator(self, cur, conn):
         insertStr = f'''insert into report_ 
         (part_number, main_part_number, manufacturer, category_, origin, price, deposit, overall_price, quantity)

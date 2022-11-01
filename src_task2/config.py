@@ -12,6 +12,6 @@ class DatabaseSettings:
 
 class FTPSettings:
     def __init__(self) -> None:
-        self.ip = os.getenv('IP')
-        self.login = os.getenv('LOGIN')
-        self.password = os.getenv('PASSWORD')
+        self.ip = os.environ['IP']
+        self.login = os.environ['LOGIN']
+        self.password = os.environ['PASSWORD']

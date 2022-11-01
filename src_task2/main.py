@@ -1,31 +1,13 @@
-from ftplib import FTP
-import dotenv
 import os
-import patoolib
+
+import dotenv
 
 from config import DatabaseSettings, FTPSettings
-from service import insert_csv_data_to_db
 from database.base import BaseDatabase
 from database.crud import \
     DataManager, PriceManager, DepositManager, QualityManager, WeightManager, ReportManager
-
-
-def list_files(ftp):
-    data = []
-    ftp.dir(data.append)
-    ftp.quit()
-    for line in data:
-        print("-", line)
-    print(ftp.pwd())
-
-
-def receive_file(filename, ftp):
-    with open("data/" + filename, 'wb') as f:
-        ftp.retrbinary(f"RETR {filename}", f.write)
-
-
-def unpack_file(filename):
-    patoolib.extract_archive("data/" + filename, outdir="data/rar_content")
+from service.csv_service import report_to_csv, insert_csv_data_to_db
+from service.ftp_service import receive_file_manager, send_file
 
 
 def init_managers(db_config: DatabaseSettings) -> tuple[BaseDatabase, ...]:
@@ -43,12 +25,17 @@ def init_managers(db_config: DatabaseSettings) -> tuple[BaseDatabase, ...]:
 
 def main():
     dotenv.load_dotenv(".env")
-    db_config = DatabaseSettings()
-    BaseDatabase(db_config).createTables()
 
+    db_config = DatabaseSettings()
+    db_base = BaseDatabase(db_config)
+    db_base.createTables()
     (data_manager, price_manager, deposit_manager,
      quality_manager, weight_manager) = init_managers(db_config)
 
+    ftp_config = FTPSettings()
+    path = "./data/rar_content"
+    os.makedirs(path, exist_ok=True)
+    filename = 'task.rar'
     files = {
         data_manager: ('data/rar_content/data.csv', ";"),
         deposit_manager: ('data/rar_content/deposit.csv', ";"),
@@ -57,21 +44,19 @@ def main():
         weight_manager: ('data/rar_content/weight.txt', "\t")
     }
 
+    receive_file_manager(ftp_config, filename)
+
     for manager, file_data in files.items():
-        ...
-        #insert_csv_data_to_db(file_data, manager)
+        insert_csv_data_to_db(file_data, manager)
 
     rManager = ReportManager(db_config)
     with rManager.transaction() as session:
         cur, conn = session
+        db_base.alterTable(cur, conn)
         rManager.reportGenerator(cur, conn)
-
-    # with FTP(os.environ['IP']) as ftp:
-    #     ftp.login(user=os.environ['LOGIN'], passwd=os.environ['PASSWORD'])
-    #     # list_files(ftp)
-    #     # receive_file("task.rar", ftp)
-    #     ftp.quit()
-    # unpack_file("task.rar")
+        report = rManager.select(cur, conn)
+        report_to_csv(report)
+    send_file(ftp_config, filename='report_Mykyta_Karant.csv')
 
 
 if __name__ == '__main__':

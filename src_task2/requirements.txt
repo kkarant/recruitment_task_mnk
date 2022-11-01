@@ -1,0 +1,8 @@
+numpy==1.23.4
+pandas==1.5.1
+patool==1.12
+psycopg2==2.9.5
+python-dateutil==2.8.2
+python-dotenv==0.21.0
+pytz==2022.5
+six==1.16.0

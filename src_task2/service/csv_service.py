@@ -1,3 +1,4 @@
+import csv
 import threading
 from typing import TypeAlias
 
@@ -63,3 +64,12 @@ def insert_csv_data_to_db(file_data: tuple[file, sep], manager: BaseDatabase) ->
     df = csv_to_dataframe(file_data)
     print(file_data[0])
     insert_df_data_threads(df, manager)
+
+
+def report_to_csv(report):
+    with open('./data/report_Mykyta_Karant.csv', 'w', encoding='utf8', newline='') as r:
+        csv_out = csv.writer(r, delimiter=',')
+        csv_out.writerow(['main_part_number', 'manufacturer',
+                          'category', 'origin', 'price', 'deposit', 'overall_price', 'quantity'])
+        for row in report:
+            csv_out.writerow(row)
